@@ -1,6 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const crypto = require('crypto');
+const validateLogin = require('./middlewares/validateLogin');
 
 const app = express();
 app.use(express.json());
@@ -30,7 +31,7 @@ app.get('/talker/:id', async (req, res) => {
 
 const newToken = () => crypto.randomBytes(8).toString('hex');
 
-app.post('/login', (_req, res) => {
+app.post('/login', validateLogin, (_req, res) => {
   res.status(200).json({ token: newToken() });
 });
 
