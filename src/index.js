@@ -1,5 +1,6 @@
 const express = require('express');
 const fs = require('fs');
+const crypto = require('crypto');
 
 const app = express();
 app.use(express.json());
@@ -25,6 +26,12 @@ app.get('/talker/:id', async (req, res) => {
     return res.status(200).json(talkerObj);
   }
   return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+});
+
+const newToken = () => crypto.randomBytes(8).toString('hex');
+
+app.post('/login', (_req, res) => {
+  res.status(200).json({ token: newToken() });
 });
 
 app.listen(PORT, () => {
