@@ -62,6 +62,15 @@ app.post('/talker', validateAuthentication, validateName, validateAge, validateT
     res.status(200).json(upDate);
   });
 
+  app.delete('/talker/:id', validateAuthentication, (req, res) => {
+    const checkID = Number(req.params.id);
+    const checkTalkers = JSON.parse(fs.readFileSync(talkEndPoint));
+    const target = checkTalkers.filter((e) => e.id !== checkID);
+  
+    fs.writeFileSync(talkEndPoint, JSON.stringify(target));
+    res.status(204).json();
+  });
+
 app.listen(PORT, () => {
   console.log('Online');
 });
