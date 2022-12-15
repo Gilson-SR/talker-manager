@@ -7,6 +7,8 @@ const { validateAuthentication } = require('./middlewares/validateAuthentication
 const { validateName } = require('./middlewares/validateName');
 const { validateTalk } = require('./middlewares/validateTalk');
 
+const talkEndPoint = 'src/talker.json';
+
 const app = express();
 app.use(express.json());
 
@@ -19,12 +21,12 @@ app.get('/', (_request, response) => {
 });
 
 app.get('/talker', async (_req, res) => {
-  const data = JSON.parse(fs.readFileSync('src/talker.json', 'utf-8'));
+  const data = JSON.parse(fs.readFileSync(talkEndPoint, 'utf-8'));
   res.status(200).json(data);
 });
 
 app.get('/talker/:id', async (req, res) => {
-  const data = JSON.parse(fs.readFileSync('src/talker.json', 'utf-8'));
+  const data = JSON.parse(fs.readFileSync(talkEndPoint, 'utf-8'));
   const talkerObj = data.find((e) => e.id === Number(req.params.id));
 
   if (talkerObj) {
@@ -39,15 +41,25 @@ app.post('/login', validateLogin, (_req, res) => {
   res.status(200).json({ token: newToken() });
 });
 
-app.post('/talker',
-validateAuthentication, validateName, validateAge, validateTalk,
-  (req, res) => {
+app.post('/talker', validateAuthentication, validateName, validateAge, validateTalk, (req, res) => {
     const { name, age, talk } = req.body;
-    const talkers = JSON.parse(fs.readFileSync('src/talker.json'));
+    const talkers = JSON.parse(fs.readFileSync(talkEndPoint));
     const addTalk = { id: talkers.length + 1, name, age, talk };
     talkers.push(addTalk);
-    fs.writeFileSync('src/talker.json', JSON.stringify(talkers));
+    fs.writeFileSync(talkEndPoint, JSON.stringify(talkers));
     res.status(201).json(addTalk);
+  });
+
+  app.put('/talker/:id', validateAuthentication, validateName, validateAge, validateTalk,
+  (req, res) => {
+    const checkId = Number(req.params.id);
+    const checkTalkers = JSON.parse(fs.readFileSync(talkEndPoint));
+    const upDate = { id: checkId, ...req.body };
+
+    checkTalkers.filter((event) => event.id !== checkId);
+    checkTalkers.push(upDate);
+    fs.writeFileSync(talkEndPoint, JSON.stringify(checkTalkers));
+    res.status(200).json(upDate);
   });
 
 app.listen(PORT, () => {
